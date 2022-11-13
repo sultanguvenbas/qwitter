@@ -1,6 +1,7 @@
 # Qwitter (qwitter)
 
 A Quasar Project
+Twitter Clone created with Quasar Framework, VueJS & Firebase
 
 ## Install the dependencies
 ```bash
