@@ -20,5 +20,20 @@ quasar dev
 quasar build
 ```
 
-### Customize the configuration
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js).
+### Desktop Version (Electron)
+#### Start in development mode
+```bash
+quasar dev -m electron
+```
+
+#### Build for production
+To build for different platforms, change the ```bash electron > packager > platform``` setting in  ```bash quasar.conf.js``` to  ```bash win32```,  ```bash darwin```,  ```bash mas``` or  ```bash linux```
+
+ ```bash quasar build -m electron```
+ 
+####iOS Version (Cordova)
+#####Install Cordova globally
+```bash npm install -g cordova```
+or
+
+```bashsudo npm install -g cordova```
