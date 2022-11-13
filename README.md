@@ -31,8 +31,8 @@ To build for different platforms, change the ```bash electron > packager > platf
 
  ```bash quasar build -m electron```
  
-####iOS Version (Cordova)
-#####Install Cordova globally
+#### iOS Version (Cordova)
+##### Install Cordova globally
 ```bash npm install -g cordova```
 or
 
