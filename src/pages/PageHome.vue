@@ -1,6 +1,6 @@
 <template>
   <q-page class="relative-position">
-    <q-scroll-area class="absolute fullscreen">
+    <q-scroll-area class="absolute full-width full-height">
       <div
           class="q-py-lg q-px-md row items-end q-col-gutter-md">
         <div class="col">
@@ -30,8 +30,8 @@
             leave-active-class="animated fadeOut slow"
         >
           <q-item class="q-py-md"
-                  v-for="qweet in qweets"
-                  :key="qweet.date">
+                  v-for="qweet in qweets.value"
+                  :key="qweet.id">
             <!--in the future you need to use id inside key-->
             <q-item-section avatar top>
               <q-avatar size="xl">
@@ -44,12 +44,11 @@
                 <strong> Sultan Guvenbas</strong>
                 <span class="text-grey-7">
                 @sultanguvenbas
-                <br class="lt-md"> &bull; {{ qweet.date | relativeDate }}
+                <br class="lt-md"> &bull; {{ qweet.date }}
               </span>
               </q-item-label>
 
               <q-item-label class="qweet-content text-body1">{{ qweet.content }}</q-item-label>
-
               <div class="qweet-icons row justify-between q-mt-sm">
                 <q-btn
                     flat
@@ -64,11 +63,13 @@
                     color="grey"
                     icon="fas fa-retweet"/>
                 <q-btn
+                    @click="toggleQweet(qweet)"
                     flat
                     round
                     size="sm"
-                    color="grey"
-                    icon="far fa-heart"/>
+                    :color="qweet.liked ? 'pink' : 'grey' "
+                    :icon= "qweet.liked ? 'fa-solid fa-heart' : 'far fa-heart' "
+                    />
                 <q-btn
                     @click="deleteQweet(qweet)"
                     flat
@@ -87,39 +88,40 @@
 
 <script>
 import {formatDistance} from 'date-fns'
+import { collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import db from 'src/boot/firebase'
-import { collection, query, onSnapshot } from "firebase/firestore";
 
 export default {
   name: 'PageHome',
   data() {
     return {
       newQweetContent: '',
-      // qweets: [
-      //   {
-      //     content: 'lorem',
-      //     date: 1668992898876
-      //   },
-      //   {
-      //     content: 'lorem',
-      //     date: 1668992943438
-      //   },
-      // ]
+      qweets: []
     }
   },
   methods: {
-    addNewQweet() {
+    async addNewQweet() {
       let newQweet = {
         content: this.newQweetContent,
-        date: Date.now()
+        date: Date.now(),
+        liked: false
       }
-      this.qweets.unshift(newQweet)
+      // this.qweets.unshift(newQweet)
+      await addDoc(collection(db, "qweets"), newQweet);
       this.newQweetContent = ''
     },
     deleteQweet(qweet) {
-      let deleteToDate = qweet.date
-      let index = this.qweets.findIndex(qweet => qweet.date === deleteToDate)
-      this.qweets.splice(index, 1)
+      deleteDoc(doc(db, "qweets", qweet.id));
+      // let deleteToId = qweet.id
+      // console.log(deleteToId)
+      // let index = this.qweets.findIndex(qweet => qweet.id === deleteToId)
+      // this.qweets.splice(index, 1)
+    },
+    async toggleQweet(qweet) {
+      const qweetRef = doc(db, "qweets", qweet.id);
+      await updateDoc(qweetRef, {
+        liked: !qweet.liked
+      });
     }
   },
   filters: {
@@ -128,21 +130,21 @@ export default {
     }
   },
   mounted() {
-    const q = query(collection(db, 'qweets'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added') {
-          console.log('New qweet: ', change.doc.data())
-          this.qweets.unshift(change.doc.data())
+    onSnapshot(collection(db, 'qweets'), (querySnapshot) => {
+      const qweetArr = [];
+      querySnapshot.forEach((doc) => {
+        const q= {
+          id: doc.id,
+          content: doc.data().content,
+          date: doc.data().date,
+          liked: doc.data().liked
         }
-        if (change.type === 'modified') {
-          console.log('Modified qweet: ', change.doc.data())
-        }
-        if (change.type === 'removed') {
-          console.log('Removed qweet: ', change.doc.data())
-        }
-      });
-    });
+        qweetArr.push(q)
+      })
+      this.qweets.value= qweetArr
+      //TODO order by date
+    })
+
   }
 }
 
