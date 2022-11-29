@@ -32,7 +32,6 @@
           <q-item class="q-py-md"
                   v-for="qweet in qweets.value"
                   :key="qweet.id">
-            <!--in the future you need to use id inside key-->
             <q-item-section avatar top>
               <q-avatar size="xl">
                 <img src="https://cdn.quasar.dev/img/avatar5.jpg">
@@ -88,7 +87,7 @@
 
 <script>
 import {formatDistance} from 'date-fns'
-import { collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, orderBy  } from "firebase/firestore";
 import db from 'src/boot/firebase'
 
 export default {
@@ -126,7 +125,7 @@ export default {
   },
   filters: {
     relativeDate(value) {
-      return formatDistance(value, new Date(), {addSuffix: true}) //TODO: check again
+      return formatDistance(value, new Date()) //TODO: check again
     }
   },
   mounted() {
